@@ -1,4 +1,3 @@
-export JetDrag
 Base.@kwdef struct JetDrag{NF} <: SpeedyWeather.AbstractDrag{NF}
 
     # DIMENSIONS from SpectralGrid
