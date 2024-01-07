@@ -10,7 +10,7 @@ To be used like
 
 ```julia
 using SpeedyWeather
-using StochasticStirr
+using StochasticStir
 
 # model components
 spectral_grid = SpectralGrid(trunc=42,nlev=1)   
