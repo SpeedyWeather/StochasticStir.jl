@@ -1,4 +1,3 @@
-export StochasticStirring
 Base.@kwdef struct StochasticStirring{NF} <: SpeedyWeather.AbstractForcing{NF}
     
     # DIMENSIONS from SpectralGrid

@@ -2,7 +2,9 @@ module StochasticStir
 
 using SpeedyWeather
 
-include("stochasitc_stirring.jl")
+export StochasticStirring, JetDrag
+
+include("stochastic_stirring.jl")
 include("jet_drag.jl")
 
 end
