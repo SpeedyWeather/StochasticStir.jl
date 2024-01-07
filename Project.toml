@@ -1,0 +1,17 @@
+name = "StochasticStir"
+uuid = "c3541e7a-ece5-4a49-9931-82ce8f5cb0be"
+authors = ["Milan Klöwer <milankloewer@gmx.de> and contributors"]
+version = "0.1"
+
+[deps]
+SpeedyWeather = "9e226e20-d153-4fed-8a5b-493def4f21a9"
+
+[compat]
+julia = "1.8"
+SpeedyWeather = "0.8"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
