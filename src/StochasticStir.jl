@@ -1,6 +1,7 @@
 module StochasticStir
 
 using SpeedyWeather
+using DocStringExtensions
 
 export StochasticStirring, JetDrag
 
