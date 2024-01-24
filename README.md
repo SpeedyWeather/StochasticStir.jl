@@ -42,6 +42,13 @@ simulation = initialize!(model)
 run!(simulation,period=Day(100),output=true)
 ```
 
+and you can get a list of options for `JetDrag` and `StochasticStirring` by typing
+```julia
+julia>? JetDrag
+julia>? StochasticStirring
+```
+where `?` opens the help.
+
 ## Gallery
 
 A visualisation of the above simulation 
