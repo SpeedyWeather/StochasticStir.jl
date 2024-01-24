@@ -71,7 +71,7 @@ function SpeedyWeather.drag!(
     time::DateTime,
     model::ModelSetup,
 )
-    SpeedyWeather.drag!(diagn,prog,drag,model.geometry)
+    SpeedyWeather.drag!(diagn,progn,drag,model.geometry)
 end
 
 """
