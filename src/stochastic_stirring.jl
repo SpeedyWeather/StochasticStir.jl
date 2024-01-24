@@ -16,7 +16,7 @@ Base.@kwdef struct StochasticStirring{NF} <: SpeedyWeather.AbstractForcing{NF}
     decorrelation_time::Second = Day(2)
 
     "Stirring strength A [1/s²]"
-    strength::Float64 = 1e-11
+    strength::Float64 = 7e-11
 
     "Stirring latitude [˚N]"
     latitude::Float64 = 45
@@ -80,8 +80,7 @@ function SpeedyWeather.initialize!( forcing::StochasticStirring,
     forcing.b[] = exp(-dt/τ)
     
     # precompute the Gaussian latitudinal mask
-    (;Grid,nlat_half) = model.spectral_grid
-    latd = RingGrids.get_latd(Grid,nlat_half)   # in ˚N
+    (;latd) = model.geometry                 # in ˚N on every latitude ring
     
     for j in eachindex(forcing.lat_mask)
         # Gaussian centred at forcing.latitude of width forcing.width
@@ -115,6 +114,7 @@ function SpeedyWeather.forcing!(diagn::DiagnosticVariablesLayer,
     a = forcing.a[]    # = sqrt(1 - exp(-2dt/τ))
     b = forcing.b[]    # = exp(-dt/τ)
     
+    # evolve stochastic coefficients in time
     (;S) = forcing
     lmax,mmax = size(S)
     @inbounds for m in 1:mmax
