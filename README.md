@@ -24,6 +24,10 @@ the whole URL as above. Requires SpeedyWeather.jl v0.8 or higher.
 
 ## Usage
 
+This package exports `StochasticStirring` and `JetDrag`. The respective terms can be added
+to SpeedyWeather.jl's `BarotropicModel` or `ShallowWaterModel` as follows. Feel free to
+raise an issue here for any related questions.
+
 ```julia
 using SpeedyWeather
 using StochasticStir
