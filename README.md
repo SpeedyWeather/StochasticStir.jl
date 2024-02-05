@@ -16,7 +16,7 @@ See
 Via Julia's package manager (opened with `]`)
 
 ```julia
-julia>] add https://github.com/SpeedyWeather/StochasticStir.jl
+julia>]add https://github.com/SpeedyWeather/StochasticStir.jl
 ```
 or via `using Pkg; Pkg.add("https://github.com/SpeedyWeather/StochasticStir.jl")`.
 This package is not registered in Julia's general registry, so you have to specify
@@ -31,7 +31,7 @@ using StochasticStir
 # model components
 spectral_grid = SpectralGrid(trunc=42,nlev=1)   
 forcing = StochasticStirring(spectral_grid,latitude=45,strength=7e-11)
-drag = JetDrag(spectral,time_scale=Day(6))
+drag = JetDrag(spectral_grid,time_scale=Day(6))
 initial_conditions = StartFromRest()
 
 # construct the model and initialize
@@ -44,8 +44,8 @@ run!(simulation,period=Day(100),output=true)
 
 and you can get a list of options for `JetDrag` and `StochasticStirring` by typing
 ```julia
-julia>? JetDrag
-julia>? StochasticStirring
+julia>?JetDrag
+julia>?StochasticStirring
 ```
 where `?` opens the help.
 
