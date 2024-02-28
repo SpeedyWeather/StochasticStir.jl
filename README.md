@@ -1,5 +1,7 @@
 # StochasticStir.jl
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10724814.svg)](https://doi.org/10.5281/zenodo.10724814)
+
 Repository for the implementation of the stochastic stirring forcing and jet drag following
 [Barnes and Hartmann, 2011](https://journals.ametsoc.org/view/journals/atsc/68/12/jas-d-11-039.1.xml?tab_body=fulltext-display#bib14)
 and [Vallis et al. 2004](https://journals.ametsoc.org/view/journals/atsc/61/3/1520-0469_2004_061_0264_amasdm_2.0.co_2.xml)
