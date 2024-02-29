@@ -1,5 +1,6 @@
 # StochasticStir.jl
 
+[![CI](https://github.com/SpeedyWeather/StochasticStir.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/SpeedyWeather/StochasticStir.jl/actions/workflows/CI.yml) 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10724814.svg)](https://doi.org/10.5281/zenodo.10724814)
 
 Repository for the implementation of the stochastic stirring forcing and jet drag following
