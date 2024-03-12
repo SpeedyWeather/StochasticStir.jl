@@ -3,7 +3,7 @@ Defines the JetDrag drag term for SpeedyWeather that applies
 a zonal drag to the BarotropicModel or ShallowWaterModel following
 a jet at specified latitude, strength and width with time scale time_scale.
 $(TYPEDFIELDS)"""
-Base.@kwdef struct JetDrag{NF} <: SpeedyWeather.AbstractDrag{NF}
+Base.@kwdef struct JetDrag{NF} <: SpeedyWeather.AbstractDrag
 
     # DIMENSIONS from SpectralGrid
     "Spectral resolution as max degree of spherical harmonics"
@@ -14,25 +14,25 @@ Base.@kwdef struct JetDrag{NF} <: SpeedyWeather.AbstractDrag{NF}
     time_scale::Second = Day(6)
 
     "Jet strength [m/s]"
-    u₀::Float64 = 20
+    u₀::NF = 20
 
     "latitude of Gaussian jet [˚N]"
-    latitude::Float64 = 30
+    latitude::NF = 30
 
     "Width of Gaussian jet [˚]"
-    width::Float64 = 6
+    width::NF = 6
 
     # TO BE INITIALISED
     "Relaxation back to reference vorticity"
-    ζ₀::LowerTriangularMatrix{Complex{NF}} = zeros(LowerTriangularMatrix{Complex{NF}},trunc+2,trunc+1)
+    ζ₀::LTM{Complex{NF}} = zeros(LTM{Complex{NF}}, trunc+2, trunc+1)
 end
 
 """
 $(TYPEDSIGNATURES)
 Generator function of a JetDrag struct taking resolution and number format from 
 a SpectralGrid. Other options are provided as keyword arguments."""
-function JetDrag(SG::SpectralGrid;kwargs...)
-    return JetDrag{SG.NF}(;SG.trunc,kwargs...)
+function JetDrag(SG::SpectralGrid; kwargs...)
+    return JetDrag{SG.NF}(; SG.trunc, kwargs...)
 end
 
 """
@@ -45,11 +45,11 @@ function SpeedyWeather.initialize!( drag::JetDrag,
                                     model::ModelSetup)
 
     (;spectral_grid, geometry) = model
-    (;Grid,NF,nlat_half) = spectral_grid
+    (;Grid, NF, nlat_half) = spectral_grid
     lat = geometry.latds        # latitude in ˚N for every grid point
 
     # zonal velocity of the jet, allocate following grid and number format NF of model
-    u = zeros(Grid{NF},nlat_half)
+    u = zeros(Grid{NF}, nlat_half)
 
     # Gaussian in latitude, calculated for every grid point ij
     for ij in eachindex(u)
@@ -57,9 +57,9 @@ function SpeedyWeather.initialize!( drag::JetDrag,
     end
 
     # to spectral space of size lmax+1 × mmax as required by the curl 
-    û = SpeedyTransforms.spectral(u,one_more_degree=true)
+    û = SpeedyTransforms.spectral(u, one_more_degree=true)
     v̂ = zero(û)
-    SpeedyTransforms.curl!(drag.ζ₀,û,v̂,model.spectral_transform)
+    SpeedyTransforms.curl!(drag.ζ₀, û, v̂, model.spectral_transform)
     return nothing
 end
 
@@ -71,7 +71,7 @@ function SpeedyWeather.drag!(
     time::DateTime,
     model::ModelSetup,
 )
-    SpeedyWeather.drag!(diagn,progn,drag,model.geometry)
+    SpeedyWeather.drag!(diagn, progn, drag, model.geometry)
 end
 
 """
@@ -85,16 +85,16 @@ function SpeedyWeather.drag!(
     drag::JetDrag,
     geometry::Geometry,
 )
-    (;vor) = progn
-    (;vor_tend) = diagn.tendencies
-    (;ζ₀) = drag
+    (; vor) = progn
+    (; vor_tend) = diagn.tendencies
+    (; ζ₀) = drag
     
     # 1/time_scale [1/s] but scaled with radius as is the vorticity equation
-    (;radius) = geometry
+    (; radius) = geometry
     r = radius/drag.time_scale.value
 
     # add the -r*(ζ-ζ₀) term to the vorticity tendency that already includes the forcing term
-    @inbounds for lm in eachindex(vor,vor_tend,ζ₀)
+    @inbounds for lm in eachindex(vor, vor_tend, ζ₀)
         vor_tend[lm] -= r*(vor[lm] - ζ₀[lm])
     end
 end
