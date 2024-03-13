@@ -1,7 +1,9 @@
+const LTM = LowerTriangularMatrix   # for convenience
+
 """A SpeedyWeather forcing term that stochastically stirrs relative vorticity in
 the BarotropicModel or the ShallowWaterModel. 
 $(TYPEDFIELDS)"""
-Base.@kwdef struct StochasticStirring{NF} <: SpeedyWeather.AbstractForcing{NF}
+Base.@kwdef struct StochasticStirring{NF} <: SpeedyWeather.AbstractForcing
     
     # DIMENSIONS from SpectralGrid
     "Spectral resolution as max degree of spherical harmonics"
@@ -16,13 +18,13 @@ Base.@kwdef struct StochasticStirring{NF} <: SpeedyWeather.AbstractForcing{NF}
     decorrelation_time::Second = Day(2)
 
     "Stirring strength A [1/s²]"
-    strength::Float64 = 7e-11
+    strength::NF = 7e-11
 
     "Stirring latitude [˚N]"
-    latitude::Float64 = 45
+    latitude::NF = 45
 
     "Stirring width [˚]"
-    width::Float64 = 24
+    width::NF = 24
 
     "Minimum degree of spherical harmonics to force"
     lmin::Int = 8
@@ -38,7 +40,7 @@ Base.@kwdef struct StochasticStirring{NF} <: SpeedyWeather.AbstractForcing{NF}
     
     # TO BE INITIALISED
     "Stochastic stirring term S"
-    S::LowerTriangularMatrix{Complex{NF}} = zeros(LowerTriangularMatrix{Complex{NF}},trunc+2,trunc+1)
+    S::LTM{Complex{NF}} = zeros(LTM{Complex{NF}},trunc+2,trunc+1)
     
     "a = A*sqrt(1 - exp(-2dt/τ)), the noise factor times the stirring strength [1/s²]"
     a::Base.RefValue{NF} = Ref(zero(NF))
@@ -54,10 +56,10 @@ end
 $(TYPEDSIGNATURES)
 Generator function for StochasticStirring using resolution and number format
 from a SpectralGrid. Further options should be provided as keyword arguments."""
-function StochasticStirring(SG::SpectralGrid;kwargs...)
-    (;trunc,Grid,nlat_half) = SG
-    nlat = RingGrids.get_nlat(Grid,nlat_half)
-    return StochasticStirring{SG.NF}(;trunc,nlat,kwargs...)
+function StochasticStirring(SG::SpectralGrid; kwargs...)
+    (;trunc, Grid, nlat_half) = SG
+    nlat = RingGrids.get_nlat(Grid, nlat_half)
+    return StochasticStirring{SG.NF}(; trunc, nlat, kwargs...)
 end
 
 """
@@ -70,7 +72,7 @@ function SpeedyWeather.initialize!( forcing::StochasticStirring,
                                     model::ModelSetup)
     
     # precompute forcing strength, scale with radius^2 as is the vorticity equation
-    (;radius) = model.spectral_grid
+    (; radius) = model.spectral_grid
     A = radius^2 * forcing.strength
     
     # precompute noise and auto-regressive factor, packed in RefValue for mutability
@@ -91,12 +93,14 @@ function SpeedyWeather.initialize!( forcing::StochasticStirring,
 end
 
 # function barrier to unpack from model what's needed (spectral transform only here)
-function SpeedyWeather.forcing!(diagn::DiagnosticVariablesLayer,
-                                progn::PrognosticVariablesLayer,
-                                forcing::StochasticStirring,
-                                time::DateTime,
-                                model::ModelSetup)
-    SpeedyWeather.forcing!(diagn,forcing,model.spectral_transform)
+function SpeedyWeather.forcing!(
+    diagn::DiagnosticVariablesLayer,
+    progn::PrognosticVariablesLayer,
+    forcing::StochasticStirring,
+    time::DateTime,
+    model::ModelSetup,
+)
+    SpeedyWeather.forcing!(diagn, forcing, model.spectral_transform)
 end
 
 """
@@ -106,9 +110,11 @@ coefficients S of the forcing following an AR1 process in time, transforms
 to grid-point space to apply a mask to only force specified latitudes then
 transforms back to force in spectral space where also the time stepping is
 applied."""
-function SpeedyWeather.forcing!(diagn::DiagnosticVariablesLayer,
-                                forcing::StochasticStirring{NF},
-                                spectral_transform::SpectralTransform) where NF
+function SpeedyWeather.forcing!(
+    diagn::DiagnosticVariablesLayer,
+    forcing::StochasticStirring{NF},
+    spectral_transform::SpectralTransform
+) where NF
     
     # noise and auto-regressive factors
     a = forcing.a[]    # = sqrt(1 - exp(-2dt/τ))
@@ -130,14 +136,14 @@ function SpeedyWeather.forcing!(diagn::DiagnosticVariablesLayer,
 
     # to grid-point space
     S_grid = diagn.dynamics_variables.a_grid        # reuse general work array
-    SpeedyTransforms.gridded!(S_grid,S,spectral_transform)
+    SpeedyTransforms.gridded!(S_grid, S, spectral_transform)
     
     # mask everything but mid-latitudes
-    RingGrids._scale_lat!(S_grid,forcing.lat_mask)
+    RingGrids._scale_lat!(S_grid, forcing.lat_mask)
     
     # back to spectral space, write directly into vorticity tendency
-    (;vor_tend) = diagn.tendencies
-    SpeedyTransforms.spectral!(vor_tend,S_grid,spectral_transform)
+    (; vor_tend) = diagn.tendencies
+    SpeedyTransforms.spectral!(vor_tend, S_grid, spectral_transform)
     
     return nothing
 end
