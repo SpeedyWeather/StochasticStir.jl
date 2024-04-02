@@ -23,6 +23,9 @@ Base.@kwdef struct StochasticStirring{NF} <: SpeedyWeather.AbstractForcing
     "Stirring latitude [˚N]"
     latitude::NF = 45
 
+    "En/disable stirring mask"
+    mask::Bool = true
+
     "Stirring width [˚]"
     width::NF = 24
 
@@ -81,12 +84,13 @@ function SpeedyWeather.initialize!( forcing::StochasticStirring,
     forcing.a[] = A*sqrt(1 - exp(-2dt/τ))
     forcing.b[] = exp(-dt/τ)
     
-    # precompute the Gaussian latitudinal mask
-    (;latd) = model.geometry                 # in ˚N on every latitude ring
-    
-    for j in eachindex(forcing.lat_mask)
-        # Gaussian centred at forcing.latitude of width forcing.width
-        forcing.lat_mask[j] = exp(-(forcing.latitude-latd[j])^2/forcing.width^2*2)
+    if forcing.mask
+        # precompute the Gaussian latitudinal mask
+        (;latd) = model.geometry                 # in ˚N on every latitude ring
+        for j in eachindex(forcing.lat_mask)
+            # Gaussian centred at forcing.latitude of width forcing.width
+            forcing.lat_mask[j] = exp(-(forcing.latitude-latd[j])^2/forcing.width^2*2)
+        end
     end
 
     return nothing
@@ -134,16 +138,20 @@ function SpeedyWeather.forcing!(
         end
     end
 
-    # to grid-point space
-    S_grid = diagn.dynamics_variables.a_grid        # reuse general work array
-    SpeedyTransforms.gridded!(S_grid, S, spectral_transform)
-    
-    # mask everything but mid-latitudes
-    RingGrids._scale_lat!(S_grid, forcing.lat_mask)
-    
-    # back to spectral space, write directly into vorticity tendency
-    (; vor_tend) = diagn.tendencies
-    SpeedyTransforms.spectral!(vor_tend, S_grid, spectral_transform)
-    
+    if forcing.mask
+        # to grid-point space
+        S_grid = diagn.dynamics_variables.a_grid        # reuse general work array
+        SpeedyTransforms.gridded!(S_grid, S, spectral_transform)
+        
+        # mask everything but mid-latitudes
+        RingGrids._scale_lat!(S_grid, forcing.lat_mask)
+        
+        # back to spectral space, write directly into vorticity tendency
+        (; vor_tend) = diagn.tendencies
+        SpeedyTransforms.spectral!(vor_tend, S_grid, spectral_transform)
+    else
+        vor_tend .= S   # copy forcing S over into vor_tend
+    end
+        
     return nothing
 end
