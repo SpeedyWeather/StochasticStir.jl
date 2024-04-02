@@ -138,6 +138,9 @@ function SpeedyWeather.forcing!(
         end
     end
 
+    # add stochastic stirring term S to vorticity tendency
+    # with masked or without (=skip additional transform)
+    (; vor_tend) = diagn.tendencies
     if forcing.mask
         # to grid-point space
         S_grid = diagn.dynamics_variables.a_grid        # reuse general work array
@@ -147,7 +150,6 @@ function SpeedyWeather.forcing!(
         RingGrids._scale_lat!(S_grid, forcing.lat_mask)
         
         # back to spectral space, write directly into vorticity tendency
-        (; vor_tend) = diagn.tendencies
         SpeedyTransforms.spectral!(vor_tend, S_grid, spectral_transform)
     else
         vor_tend .= S   # copy forcing S over into vor_tend
