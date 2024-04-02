@@ -40,8 +40,9 @@ end
 @testset "Mask off" begin
     spectral_grid = SpectralGrid(trunc=31, nlev=1)
     drag = JetDrag(spectral_grid, time_scale=Day(6))
-    
     forcing = StochasticStirring(spectral_grid, mask=false)
+    initial_conditions = StartFromRest()
+
     model = BarotropicModel(;spectral_grid, initial_conditions, forcing, drag)
     simulation = initialize!(model)
 
