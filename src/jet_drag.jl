@@ -56,8 +56,8 @@ function SpeedyWeather.initialize!( drag::JetDrag,
         u[ij] = drag.u₀ * exp(-(lat[ij]-drag.latitude)^2/(2*drag.width^2))
     end
 
-    # to spectral space of size lmax+1 × mmax as required by the curl 
-    û = SpeedyTransforms.spectral(u, one_more_degree=true)
+    # to spectral space, reusing the precomputed spectral transform from model
+    û = SpeedyTransforms.spectral(u, model.spectral_transform)
     v̂ = zero(û)
     SpeedyTransforms.curl!(drag.ζ₀, û, v̂, model.spectral_transform)
     return nothing
