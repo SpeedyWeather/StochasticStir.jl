@@ -1,3 +1,7 @@
+# ARCHIVED REPOSITORY
+
+Please use `StochasticStirring` and `JetDrag` as defined in the [SpeedyWeather.jl](https://github.com/SpeedyWeather/SpeedyWeather.jl) main repository.
+
 # StochasticStir.jl
 
 [![CI](https://github.com/SpeedyWeather/StochasticStir.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/SpeedyWeather/StochasticStir.jl/actions/workflows/CI.yml) 
